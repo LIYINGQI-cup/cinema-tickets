@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registration · Cinema.Tickets</title>
+  <link rel="stylesheet" href="./kit/tokens.css">
+  <link rel="stylesheet" href="./kit/base.css">
+  <link rel="stylesheet" href="./kit/layout.css">
+  <link rel="stylesheet" href="./kit/components.css">
+</head>
+<body>
+  <div class="l-page">
+    <header class="l-header">
+      <div class="l-container c-header">
+        <a class="c-header__logo" href="index.html">
+          <svg class="c-icon c-icon--lg" aria-hidden="true"><use href="./kit/icons.svg#icon-logo"></use></svg>
+          <span>Cinema.Tickets</span>
+        </a>
+        <nav class="c-nav" aria-label="Main">
+          <a class="c-nav__link" href="index.html" data-page="movies">Movies</a>
+          <a class="c-nav__link" href="bookings.html" data-page="bookings">Bookings</a>
+          <a class="c-nav__link" href="cart.html" data-page="cart">Cart <span class="c-counter" hidden>0</span></a>
+        </nav>
+        <div class="c-header__user"></div>
+      </div>
+    </header>
+
+    <main class="l-main">
+      <div class="l-container l-stack l-stack--lg">
+        <div class="l-narrow">
+          <section class="c-card" aria-labelledby="reg-title">
+            <div class="c-card__header"><h1 class="c-card__title" id="reg-title">Create an account</h1></div>
+            <form class="c-card__body" id="reg-form" novalidate>
+              <div id="reg-error"></div>
+
+              <div class="c-field">
+                <label class="c-field__label" for="reg-name">Full name</label>
+                <input class="c-input" id="reg-name" type="text" name="fullName" autocomplete="name">
+                <p class="c-field__error" id="reg-name-error" hidden><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-error"></use></svg><span></span></p>
+              </div>
+              <div class="c-field">
+                <label class="c-field__label" for="reg-email">Email</label>
+                <input class="c-input" id="reg-email" type="email" name="email" autocomplete="email" aria-describedby="reg-email-hint">
+                <p class="c-field__hint" id="reg-email-hint">The email is used to log in.</p>
+                <p class="c-field__error" id="reg-email-error" hidden><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-error"></use></svg><span></span></p>
+              </div>
+              <div class="c-field">
+                <label class="c-field__label" for="reg-password">Password</label>
+                <input class="c-input" id="reg-password" type="password" name="password" autocomplete="new-password" aria-describedby="reg-password-hint">
+                <p class="c-field__hint" id="reg-password-hint">6 to 64 characters, at least one letter and one digit.</p>
+                <p class="c-field__error" id="reg-password-error" hidden><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-error"></use></svg><span></span></p>
+              </div>
+              <div class="c-field">
+                <label class="c-field__label" for="reg-birth">Date of birth</label>
+                <input class="c-input" id="reg-birth" type="date" name="birthDate" autocomplete="bday">
+                <p class="c-field__error" id="reg-birth-error" hidden><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-error"></use></svg><span></span></p>
+              </div>
+              <fieldset class="c-field">
+                <legend class="c-field__label">Gender</legend>
+                <div class="c-field__row">
+                  <label class="c-radio"><input class="c-radio__input" type="radio" name="gender" value="Male"><span class="c-radio__box" aria-hidden="true"></span><span>Male</span></label>
+                  <label class="c-radio"><input class="c-radio__input" type="radio" name="gender" value="Female"><span class="c-radio__box" aria-hidden="true"></span><span>Female</span></label>
+                </div>
+              </fieldset>
+              <div class="c-field">
+                <label class="c-field__label" for="reg-phone">Phone number</label>
+                <input class="c-input" id="reg-phone" type="tel" name="phoneNumber" autocomplete="tel" placeholder="+7 (___) ___-__-__" aria-describedby="reg-phone-hint">
+                <p class="c-field__hint" id="reg-phone-hint">Format: +7 (xxx) xxx-xx-xx.</p>
+                <p class="c-field__error" id="reg-phone-error" hidden><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-error"></use></svg><span></span></p>
+              </div>
+
+              <button class="c-btn c-btn--primary c-btn--block" type="submit" id="reg-submit">Register</button>
+            </form>
+            <div class="c-card__footer">
+              <p class="u-muted">Already registered? <a href="login.html">Log in</a></p>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer class="l-footer">
+      <div class="l-container c-footer">© 2026 Cinema.Tickets · Frontend study project</div>
+    </footer>
+  </div>
+  <script type="module" src="./js/pages/registration.js"></script>
+</body>
+</html>
