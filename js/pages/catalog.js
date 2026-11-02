@@ -1,6 +1,6 @@
-import { api, ApiError } from '../api.js';
+import { api } from '../api.js';
 import { getConfig } from '../config.js';
-import { renderHeader, updateCartCounter } from '../ui.js';
+import { renderHeader } from '../ui.js';
 import { duration, genreLabel, GENRES, AGE_RATINGS, SORTINGS, shortDate } from '../format.js';
 
 renderHeader('movies');
@@ -147,28 +147,41 @@ function renderMovies(movies) {
 }
 
 function renderPagination(total, current, pageSize) {
+  if (total <= pageSize) { 
+    pagination.innerHTML = ''; 
+    return; 
+  }
+  
   const pages = Math.ceil(total / pageSize);
-  if (pages <= 1) { pagination.innerHTML = ''; return; }
   const links = [];
   
   const mk = (page, label, extra = '') => {
-    const p = new URLSearchParams(params);
+    const p = new URLSearchParams();
+    params.forEach((value, key) => {
+      if (value && key !== 'page') { 
+        p.append(key, value);
+      }
+    });
     p.set('page', page);
     return `<a class="c-pagination__link" href="index.html?${p}" ${extra}>${label}</a>`;
   };
 
-  links.push(current > 1
-    ? mk(current - 1, `<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-left"></use></svg>Previous`)
-    : `<a class="c-pagination__link" aria-disabled="true"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-left"></use></svg>Previous</a>`);
-  
+  if (current > 1) {
+    links.push(mk(current - 1, `<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-left"></use></svg>Previous`));
+  } else {
+    links.push(`<a class="c-pagination__link" aria-disabled="true"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-left"></use></svg>Previous</a>`);
+  }
+
   for (let i = 1; i <= pages; i++) {
     links.push(mk(i, i, i === current ? 'aria-current="page"' : ''));
   }
-  
-  links.push(current < pages
-    ? mk(current + 1, `Next<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-right"></use></svg>`)
-    : `<a class="c-pagination__link" aria-disabled="true">Next<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-right"></use></svg></a>`);
-  
+
+  if (current < pages) {
+    links.push(mk(current + 1, `Next<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-right"></use></svg>`));
+  } else {
+    links.push(`<a class="c-pagination__link" aria-disabled="true">Next<svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-chevron-right"></use></svg></a>`);
+  }
+
   pagination.innerHTML = links.join('');
 }
 
