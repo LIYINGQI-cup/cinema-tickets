@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Movies · Cinema.Tickets</title>
+  <link rel="stylesheet" href="./kit/tokens.css">
+  <link rel="stylesheet" href="./kit/base.css">
+  <link rel="stylesheet" href="./kit/layout.css">
+  <link rel="stylesheet" href="./kit/components.css">
+</head>
+<body>
+  <div class="l-page">
+    <header class="l-header">
+      <div class="l-container c-header">
+        <a class="c-header__logo" href="index.html">
+          <svg class="c-icon c-icon--lg" aria-hidden="true"><use href="./kit/icons.svg#icon-logo"></use></svg>
+          <span>Cinema.Tickets</span>
+        </a>
+        <nav class="c-nav" aria-label="Main">
+          <a class="c-nav__link" href="index.html" data-page="movies">Movies</a>
+          <a class="c-nav__link" href="bookings.html" data-page="bookings">Bookings</a>
+          <a class="c-nav__link" href="cart.html" data-page="cart">Cart <span class="c-counter" hidden>0</span></a>
+        </nav>
+        <div class="c-header__user"></div>
+      </div>
+    </header>
+
+    <main class="l-main">
+      <div class="l-container l-stack l-stack--lg">
+        <div class="c-page-title">
+          <div class="c-page-title__main">
+            <h1>Movies</h1>
+            <div class="c-page-title__subtitle" id="movies-count"></div>
+          </div>
+        </div>
+
+        <form class="c-filter-bar" method="get" action="index.html" id="filters" aria-label="Filters">
+          <div class="c-filter-bar__filters">
+            <details class="c-multiselect" id="filter-genres">
+              <summary class="c-multiselect__summary">
+                <span class="c-multiselect__label">Genres</span>
+                <span class="c-multiselect__control"><span class="c-multiselect__value">Any</span><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-chevron-down"></use></svg></span>
+              </summary>
+              <div class="c-multiselect__panel" id="genres-panel"></div>
+            </details>
+            <details class="c-multiselect" id="filter-ages">
+              <summary class="c-multiselect__summary">
+                <span class="c-multiselect__label">Age rating</span>
+                <span class="c-multiselect__control"><span class="c-multiselect__value">Any</span><svg class="c-icon c-icon--sm" aria-hidden="true"><use href="./kit/icons.svg#icon-chevron-down"></use></svg></span>
+              </summary>
+              <div class="c-multiselect__panel" id="ages-panel"></div>
+            </details>
+            <div class="c-field">
+              <label class="c-field__label" for="filter-date">Date</label>
+              <select class="c-select" id="filter-date" name="date">
+                <option value="">Any date</option>
+              </select>
+            </div>
+            <div class="c-field">
+              <label class="c-field__label" for="filter-sorting">Sort by</label>
+              <select class="c-select" id="filter-sorting" name="sorting"></select>
+            </div>
+            <div class="c-filter-bar__toggle">
+              <label class="c-switch"><input class="c-switch__input" type="checkbox" name="nowShowing" value="true" id="filter-now"><span class="c-switch__track" aria-hidden="true"></span><span>Now showing only</span></label>
+            </div>
+          </div>
+          <div class="c-filter-bar__actions">
+            <button class="c-btn c-btn--primary" type="submit">Apply</button>
+            <a class="c-btn c-btn--link" href="index.html">Reset</a>
+          </div>
+        </form>
+
+        <div class="l-grid l-grid--cols-4" id="movies-grid" aria-busy="true"></div>
+        <nav class="c-pagination" id="pagination" aria-label="Pages"></nav>
+      </div>
+    </main>
+
+    <footer class="l-footer">
+      <div class="l-container c-footer">© 2026 Cinema.Tickets · Frontend study project</div>
+    </footer>
+  </div>
+  <script type="module" src="./js/pages/catalog.js"></script>
+</body>
+</html>
