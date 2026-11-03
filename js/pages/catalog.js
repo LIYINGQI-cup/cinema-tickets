@@ -90,11 +90,19 @@ async function loadMovies(pageSize) {
 
   try {
     const data = await api.movies(qs.toString());
-    const movies = data.items || data.movies || [];
     
-    countEl.textContent = `${data.totalItems} ${data.totalItems === 1 ? 'movie' : 'movies'}`;
+    const movies = data.movies || []; 
+    const paginationInfo = data.pagination || {}; // 分页数据在 pagination 对象里
+
+    countEl.textContent = `${paginationInfo.totalItems || 0} ${paginationInfo.totalItems === 1 ? 'movie' : 'movies'}`;
     renderMovies(movies);
-    renderPagination(data.totalItems, currentPage, pageSize);
+    
+    renderPagination(
+      paginationInfo.totalItems || 0, 
+      paginationInfo.currentPage || 1, 
+      paginationInfo.pageSize || 8
+    );
+    
     grid.setAttribute('aria-busy', 'false');
   } catch (e) {
     grid.innerHTML = '';
