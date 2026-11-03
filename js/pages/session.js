@@ -202,7 +202,11 @@ function renderSummary() {
     return;
   }
 
-const mySessionItems = (cartData?.items || []).filter(i => i.sessionId === sessionId);
+const mySessionItems = (cartData?.items || []).filter(i => 
+  i.sessionId === sessionId || 
+  i.session_id === sessionId || 
+  i.session?.id === sessionId
+);
   let listHtml = mySessionItems.map(item => `
     <li class="c-cart-seat">
       <span class="c-cart-seat__label">Row ${item.row}, Seat ${item.number}</span>

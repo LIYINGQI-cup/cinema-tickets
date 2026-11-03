@@ -8,6 +8,15 @@ export async function initTz() {
   } catch {}
 }
 
+function safeDate(iso) {
+  if (!iso) return new Date();
+  if (typeof iso === 'string' && /^\d+$/.test(iso)) {
+    return new Date(Number(iso) * 1000);
+  }
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
 export function money(v) {
   const n = Number(v) || 0;
   return `${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',')} ₽`;
@@ -15,24 +24,24 @@ export function money(v) {
 export function discountMoney(v) { return `−${money(Math.abs(v))}`; }
 
 export function dateOnly(iso) {
-  return new Date(iso).toLocaleDateString('en-GB', {
+  return safeDate(iso).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric', timeZone: tz,
   });
 }
 export function dateTime(iso) {
-  return new Date(iso).toLocaleString('en-GB', {
+  return safeDate(iso).toLocaleString('en-GB', {
     day: 'numeric', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz,
   }).replace(',', ' ·');
 }
 export function shortDate(iso) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: tz });
+  return safeDate(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: tz });
 }
 export function weekdayShort(iso) {
-  return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', timeZone: tz });
+  return safeDate(iso).toLocaleDateString('en-GB', { weekday: 'short', timeZone: tz });
 }
 export function timeOnly(iso) {
-  return new Date(iso).toLocaleTimeString('en-GB', {
+  return safeDate(iso).toLocaleTimeString('en-GB', {
     hour: '2-digit', minute: '2-digit', hour12: false, timeZone: tz,
   });
 }
