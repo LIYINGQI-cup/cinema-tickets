@@ -148,7 +148,7 @@ function renderMovie(movie, sessions, selectedDate, config) {
 
 function renderReviews(data, checkData, movie) {
   const sec = document.getElementById('reviews-section');
-  const count = data.totalItems || 0;
+  const count = data.pagination.totalItems || 0;
   
   let html = `
     <div class="l-section__header">
@@ -163,14 +163,14 @@ function renderReviews(data, checkData, movie) {
       <div class="c-alert__action"><a class="c-btn c-btn--secondary c-btn--sm" href="login.html?returnUrl=${encodeURIComponent(location.pathname + location.search)}">Log in</a></div>
     </div>`;
   } else if (checkData) {
-    if (checkData.status === 'NotAttended') {
+    if (checkData.eligibility === 'NotAttended') {
       html += `<div class="c-alert c-alert--info" role="status">
         <svg class="c-icon c-alert__icon"><use href="./kit/icons.svg#icon-info"></use></svg>
         <div class="c-alert__body"><p>You can review this movie after attending one of its sessions.</p></div>
       </div>`;
-    } else if (checkData.status === 'Allowed') {
+    } else if (checkData.eligibility === 'Allowed') {
       html += `<div class="c-alert c-alert--info"><p>Review form coming soon.</p></div>`;
-    } else if (checkData.status === 'AlreadyReviewed' && checkData.myReview) {
+    } else if (checkData.eligibility === 'AlreadyReviewed' && checkData.myReview) {
       const r = checkData.myReview;
       html += `
         <article class="c-review c-review--mine">
@@ -190,8 +190,8 @@ function renderReviews(data, checkData, movie) {
   }
 
   html += `<div id="reviews-list">`;
-  if (data.items && data.items.length > 0) {
-    data.items.filter(r => !r.isMine).forEach(r => {
+  if (data.reviews && data.reviews.length > 0) {
+    data.reviews.filter(r => !r.isMine).forEach(r => {
       html += `
         <article class="c-review">
           <header class="c-review__header">
