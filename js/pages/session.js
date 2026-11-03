@@ -13,13 +13,13 @@ let currentSession = null;
 let seatsData = null;
 let cartData = null;
 let timerInterval = null;
+let globalConfig = null;
 
 async function init() {
   if (!sessionId) return renderError('Session not found');
   
   try {
-    const config = await getConfig();
-    
+    globalConfig = await getConfig();
     const promises = [api.session(sessionId), api.seats(sessionId)];
     if (isAuthorized()) promises.push(api.cart());
     
@@ -29,7 +29,7 @@ async function init() {
     seatsData = seats;
     cartData = cart;
 
-    renderLayout(config);
+    renderLayout(globalConfig);
     renderSeatmap();
     renderSummary();
     startTimer();
@@ -45,7 +45,17 @@ function renderError(msg) {
 
 function renderLayout(config) {
   const isClosed = !currentSession.isBookingOpen;
-  const closeTime = currentSession.bookingClosesAt ? new Date(currentSession.bookingClosesAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: config.timeZone }) : '';
+  
+  let closeTime = 'Unknown';
+  if (currentSession.bookingClosesAt) {
+    closeTime = new Date(currentSession.bookingClosesAt).toLocaleTimeString('en-GB', { 
+      hour: '2-digit', minute: '2-digit', timeZone: config.timeZone 
+    });
+  }
+
+  const timeStr = currentSession.startAt === currentSession.endAt 
+    ? dateOnly(currentSession.startAt)
+    : `${dateOnly(currentSession.startAt)} · ${timeRange(currentSession.startAt, currentSession.endAt)}`;
 
   main.innerHTML = `
     <div class="l-container l-stack l-stack--lg">
@@ -55,7 +65,7 @@ function renderLayout(config) {
         <div class="c-page-title__main">
           <h1>${currentSession.movie.title}</h1>
           <div class="c-page-title__subtitle">
-            <span class="c-page-title__item"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-calendar"></use></svg>${dateOnly(currentSession.startAt)} · ${timeRange(currentSession.startAt, currentSession.endAt)}</span>
+            <span class="c-page-title__item"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-calendar"></use></svg>${timeStr}</span>
             <span class="c-format">${formatLabel(currentSession.format)}</span>
             <span class="c-page-title__item"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-hall"></use></svg>${currentSession.hall.name}</span>
             <span class="c-age">${ageLabel(currentSession.movie.ageRating)}</span>
@@ -150,7 +160,9 @@ async function handleSeatClick(btn) {
     } else {
       const res = await api.addToCart({ sessionId, row, number });
       btn.setAttribute('aria-pressed', 'true');
-      btn.dataset.id = res.id;
+      btn.dataset.id = res.id; 
+      seatsData = await api.seats(sessionId);
+      renderSeatmap();
     }
     
     cartData = await api.cart();
@@ -170,11 +182,21 @@ async function handleSeatClick(btn) {
   }
 }
 
+function getMySessionItems() {
+  if (!cartData || !cartData.items) return [];
+  
+  return cartData.items.filter(item => {
+    return item.session && String(item.session.id) === String(sessionId);
+  });
+}
+
 function renderSummary() {
   const aside = document.getElementById('summary-container');
   const isClosed = !currentSession.isBookingOpen;
   
-  if (isClosed) {
+  const maxSeats = globalConfig?.maxSeatsPerSession || 8;
+  
+  if (isClosed || !isAuthorized()) {
     aside.innerHTML = `
       <section class="c-summary">
         <h2 class="c-summary__title">Prices</h2>
@@ -182,39 +204,27 @@ function renderSummary() {
           <div class="c-summary__line"><dt>Standard</dt><dd>${money(currentSession.prices.standard)}</dd></div>
           <div class="c-summary__line"><dt>VIP</dt><dd>${money(currentSession.prices.vip)}</dd></div>
         </dl>
-        <div class="c-summary__actions"><a class="c-btn c-btn--secondary c-btn--block" href="movie.html?id=${currentSession.movie.id}">Choose another session</a></div>
+        <p class="c-summary__note">Up to ${maxSeats} seats per session.</p>
+        ${!isClosed ? `<div class="c-summary__actions"><a class="c-btn c-btn--secondary c-btn--block" href="login.html">Log in</a></div>` : ''}
       </section>
     `;
     return;
   }
 
-  if (!isAuthorized()) {
-    aside.innerHTML = `
-      <section class="c-summary">
-        <h2 class="c-summary__title">Prices</h2>
-        <dl class="c-summary__lines">
-          <div class="c-summary__line"><dt>Standard</dt><dd>${money(currentSession.prices.standard)}</dd></div>
-          <div class="c-summary__line"><dt>VIP</dt><dd>${money(currentSession.prices.vip)}</dd></div>
-        </dl>
-        <p class="c-summary__note">Up to ${currentSession.maxSeatsPerSession || 8} seats per session.</p>
-      </section>
-    `;
-    return;
-  }
+  const mySessionItems = getMySessionItems();
 
-const mySessionItems = (cartData?.items || []).filter(i => 
-  i.sessionId === sessionId || 
-  i.session_id === sessionId || 
-  i.session?.id === sessionId
-);
-  let listHtml = mySessionItems.map(item => `
+  let listHtml = mySessionItems.map(item => {
+    const cId = item.id;
+    return `
     <li class="c-cart-seat">
       <span class="c-cart-seat__label">Row ${item.row}, Seat ${item.number}</span>
       <span class="c-badge c-badge--neutral">${item.seatType === 'Vip' ? 'VIP' : 'Standard'}</span>
       <span class="c-cart-seat__price">${money(item.price)}</span>
-      <button class="c-btn c-btn--ghost c-btn--icon c-btn--sm" type="button" onclick="document.querySelector('[data-row=\\'${item.row}\\'][data-number=\\'${item.number}\\']').click()" aria-label="Remove row ${item.row}, seat ${item.number}"><svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-trash"></use></svg></button>
+      <button class="c-btn c-btn--ghost c-btn--icon c-btn--sm js-remove-seat" type="button" data-cart-item-id="${cId}" aria-label="Remove row ${item.row}, seat ${item.number}">
+        <svg class="c-icon c-icon--sm"><use href="./kit/icons.svg#icon-trash"></use></svg>
+      </button>
     </li>
-  `).join('');
+  `}).join('');
 
   const total = mySessionItems.reduce((sum, i) => sum + i.price, 0);
   const earliestHold = mySessionItems.length ? new Date(Math.min(...mySessionItems.map(i => new Date(i.heldUntil).getTime()))) : null;
@@ -232,9 +242,29 @@ const mySessionItems = (cartData?.items || []).filter(i =>
       <div class="c-summary__actions">
         <a class="c-btn c-btn--primary c-btn--block ${mySessionItems.length === 0 ? 'is-disabled' : ''}" href="cart.html" ${mySessionItems.length === 0 ? 'aria-disabled="true"' : ''}>Go to cart</a>
       </div>
-      <p class="c-summary__note">Up to 8 seats per session. Booking closes at 19:00.</p>
+      <p class="c-summary__note">Up to ${maxSeats} seats per session.</p>
     </section>
   `;
+
+  aside.querySelectorAll('.js-remove-seat').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const cid = btn.dataset.cartItemId;
+      if (!cid) return;
+      btn.classList.add('is-loading');
+      try {
+        await api.removeCartItem(cid);
+        cartData = await api.cart();
+        seatsData = await api.seats(sessionId);
+        renderSeatmap();
+        renderSummary();
+        updateCartCounter();
+      } catch (e) {
+        toast(e.message, 'danger');
+      } finally {
+        btn.classList.remove('is-loading');
+      }
+    });
+  });
 }
 
 function startTimer() {
@@ -243,7 +273,7 @@ function startTimer() {
     const timerEl = document.getElementById('summary-timer');
     if (!timerEl || !cartData) return;
     
-    const myItems = (cartData.items || []).filter(i => i.sessionId === sessionId);
+    const myItems = getMySessionItems();
     if (!myItems.length) return;
 
     const earliestHold = new Date(Math.min(...myItems.map(i => new Date(i.heldUntil).getTime())));
@@ -251,7 +281,12 @@ function startTimer() {
     
     if (leftMs <= 0) {
       clearInterval(timerInterval);
-      api.cart().then(c => { cartData = c; renderSummary(); renderSeatmap(); updateCartCounter(); });
+      api.cart().then(c => { 
+        cartData = c; 
+        renderSummary(); 
+        api.seats(sessionId).then(s => { seatsData = s; renderSeatmap(); });
+        updateCartCounter(); 
+      });
     } else {
       timerEl.querySelector('span').textContent = `Held until ${earliestHold.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'})} · ${timerText(leftMs)} left`;
       if (leftMs < 120000) timerEl.classList.add('is-warning');
