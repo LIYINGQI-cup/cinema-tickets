@@ -129,7 +129,7 @@ function renderMovie(movie, sessions, selectedDate, config) {
             </header>
             <div class="c-session-group__list">
               ${fmtSessions.map(s => {
-                const time = new Date(s.startAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: config.timeZone });
+                const time = new Date(s.startsAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: config.timeZone });
                 return s.isBookingOpen
                   ? `<a class="c-session" href="session.html?id=${s.id}"><span class="c-session__time">${time}</span><span class="c-session__hall">${s.hall.name}</span><span class="c-session__price">from ${s.prices.standard} ₽</span></a>`
                   : `<a class="c-session" aria-disabled="true"><span class="c-session__time">${time}</span><span class="c-session__hall">${s.hall.name}</span><span class="c-session__price">Booking closed</span></a>`;

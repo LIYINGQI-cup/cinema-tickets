@@ -53,9 +53,9 @@ function renderLayout(config) {
     });
   }
 
-  const timeStr = currentSession.startAt === currentSession.endAt 
-    ? dateOnly(currentSession.startAt)
-    : `${dateOnly(currentSession.startAt)} · ${timeRange(currentSession.startAt, currentSession.endAt)}`;
+  const timeStr = currentSession.startsAt === currentSession.endAt 
+    ? dateOnly(currentSession.startsAt)
+    : `${dateOnly(currentSession.startsAt)} · ${timeRange(currentSession.startsAt, currentSession.endAt)}`;
 
   main.innerHTML = `
     <div class="l-container l-stack l-stack--lg">
